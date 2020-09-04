@@ -17,7 +17,7 @@ const { check, validationResult } = require('express-validator');
 router.get('/', auth, async (req, res) => {
   // in the auth middleware we set req.user to decoded.user so now we have access to req.user.id
   try {
-    const user = await (await User.findById(req.user.id)).select('-password');
+    const user = await User.findById(req.user.id).select('-password');
     res.json(user);
   } catch (err) {
     console.error(err.message);
@@ -70,7 +70,7 @@ router.post(
       jwt.sign(
         payload,
         config.get('jwtSecret'),
-        { expiresIn: 3600 },
+        { expiresIn: 3600000 },
         (err, token) => {
           if (err) throw err;
           res.json({ token });
