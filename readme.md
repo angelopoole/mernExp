@@ -1,6 +1,6 @@
 ### Practice application for learning the **MERN** stack
 
-This is a begginer application using the mern stack in order to better understand how to code express backends and interact with mongoDB
+This is a beginer application using the mern stack in order to better understand how to code express backends and interact with mongoDB
 
 ## technologies used ->
 
