@@ -124,12 +124,11 @@ router.get('/', async (req, res) => {
 	}
 });
 
-// @route   Get api/profile/iser/:user_id
+// @route   Get api/profile/user/:user_id
 // @desc    Get profile by user id
 // @access  Public
 router.get('/user/:user_id', async (req, res) => {
 	try {
-		//populate will take in a model to populate from and the attributes of the model that you want to add to the resource that you're pulling from.
 		const profile = await Profile.findOne({
 			user: req.params.user_id,
 		}).populate('user', ['name', 'avatar']);
@@ -146,5 +145,79 @@ router.get('/user/:user_id', async (req, res) => {
 		res.status(500).send('Server Error');
 	}
 });
+
+// @route   Delete api/profile
+// @desc    delete profile, user and posts
+// @access  Private
+router.delete('/', auth, async (req, res) => {
+	try {
+		//@todo - remove users posts
+		// remove profile
+		await Profile.findOneAndDelete({ user: req.user.id });
+		// remove user
+		await User.findOneAndDelete({ _id: req.user.id });
+
+		res.json({ msg: 'user Deleted' });
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server Error');
+	}
+});
+
+// @route   Put api/profile/experience
+// @desc    Add profile experience
+// @access  Private
+// @ToDo    create ability to update expereience
+router.put(
+	'/experience',
+	[
+		auth,
+		[
+			check('title', 'Title is reqired').not().isEmpty(),
+			check('company', 'Company is reqired').not().isEmpty(),
+			check('from', 'From date is reqired').not().isEmpty(),
+		],
+	],
+	async (req, res) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+
+		const {
+			title,
+			company,
+			location,
+			from,
+			to,
+			current,
+			description,
+		} = req.body;
+
+		const newExp = {
+			title,
+			company,
+			location,
+			from,
+			to,
+			current,
+			description,
+		};
+
+		try {
+			const profile = await Profile.findOne({ user: req.user.id });
+
+			// let expArr = profile.experience;
+			// expArr = [newExp, ...expArr];
+			profile.experience = [newExp, ...profile.experience];
+			await profile.save();
+
+			res.json(profile);
+		} catch (err) {
+			console.error(err.message);
+			res.status(500).send('Server error');
+		}
+	}
+);
 
 module.exports = router;
