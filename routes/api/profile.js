@@ -245,14 +245,17 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
 });
 
 ////////////////////////////////////////////////////
-
+// @route   Put api/profile/education
+// @desc    Add profile education
+// @access  Private
 router.put(
-	'/experience',
+	'/education',
 	[
 		auth,
 		[
-			check('title', 'Title is reqired').not().isEmpty(),
-			check('company', 'Company is reqired').not().isEmpty(),
+			check('school', 'School is reqired').not().isEmpty(),
+			check('degree', 'Degree is reqired').not().isEmpty(),
+			check('fieldofstudy', 'Field of study date is reqired').not().isEmpty(),
 			check('from', 'From date is reqired').not().isEmpty(),
 		],
 	],
@@ -263,19 +266,19 @@ router.put(
 		}
 
 		const {
-			title,
-			company,
-			location,
+			school,
+			degree,
+			fieldofstudy,
 			from,
 			to,
 			current,
 			description,
 		} = req.body;
 
-		const newExp = {
-			title,
-			company,
-			location,
+		const newEdu = {
+			school,
+			degree,
+			fieldofstudy,
 			from,
 			to,
 			current,
@@ -287,7 +290,7 @@ router.put(
 
 			// let expArr = profile.experience;
 			// expArr = [newExp, ...expArr];
-			profile.experience = [newExp, ...profile.experience];
+			profile.education = [newEdu, ...profile.education];
 			await profile.save();
 
 			res.json(profile);
@@ -298,20 +301,20 @@ router.put(
 	}
 );
 
-// @route   Put api/profile/experience/:exp_id
-// @desc    Delete experience from profile
+// @route   Put api/profile/education/:edu_id
+// @desc    Delete education from profile
 // @access  Private
 
-router.delete('/experience/:exp_id', auth, async (req, res) => {
+router.delete('/education/:edu_id', auth, async (req, res) => {
 	try {
 		const profile = await Profile.findOne({ user: req.user.id });
 
 		// Get remove index
-		const removeIndex = profile.experience
+		const removeIndex = profile.education
 			.map(item => item.id)
-			.indexOf(req.params.exp_id);
-		//experience
-		profile.experience.splice(removeIndex, 1);
+			.indexOf(req.params.edu_id);
+		//education
+		profile.education.splice(removeIndex, 1);
 
 		await profile.save();
 
