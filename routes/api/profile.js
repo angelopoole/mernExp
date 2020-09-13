@@ -1,7 +1,12 @@
 const express = require('express');
+const axios = require('axios');
 const router = express.Router();
+const config = require('config');
 const auth = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
+// bring in normalize to give us a proper url, regardless of what user entered, to be added to website social profile field @route    POST api/profile
+
+const normalize = require('normalize-url');
 
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
@@ -340,6 +345,7 @@ router.get('/github/:username', async (req, res) => {
 		};
 
 		const gitHubResponse = await axios.get(uri, { headers });
+		// console.log({ gitHubResponse });
 		return res.json(gitHubResponse.data);
 	} catch (err) {
 		console.error(err.message);
