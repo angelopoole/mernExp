@@ -220,4 +220,106 @@ router.put(
 	}
 );
 
+// @route   Put api/profile/experience/:exp_id
+// @desc    Delete experience from profile
+// @access  Private
+
+router.delete('/experience/:exp_id', auth, async (req, res) => {
+	try {
+		const profile = await Profile.findOne({ user: req.user.id });
+
+		// Get remove index
+		const removeIndex = profile.experience
+			.map(item => item.id)
+			.indexOf(req.params.exp_id);
+		//experience
+		profile.experience.splice(removeIndex, 1);
+
+		await profile.save();
+
+		res.json(profile);
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server Error');
+	}
+});
+
+////////////////////////////////////////////////////
+
+router.put(
+	'/experience',
+	[
+		auth,
+		[
+			check('title', 'Title is reqired').not().isEmpty(),
+			check('company', 'Company is reqired').not().isEmpty(),
+			check('from', 'From date is reqired').not().isEmpty(),
+		],
+	],
+	async (req, res) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+
+		const {
+			title,
+			company,
+			location,
+			from,
+			to,
+			current,
+			description,
+		} = req.body;
+
+		const newExp = {
+			title,
+			company,
+			location,
+			from,
+			to,
+			current,
+			description,
+		};
+
+		try {
+			const profile = await Profile.findOne({ user: req.user.id });
+
+			// let expArr = profile.experience;
+			// expArr = [newExp, ...expArr];
+			profile.experience = [newExp, ...profile.experience];
+			await profile.save();
+
+			res.json(profile);
+		} catch (err) {
+			console.error(err.message);
+			res.status(500).send('Server error');
+		}
+	}
+);
+
+// @route   Put api/profile/experience/:exp_id
+// @desc    Delete experience from profile
+// @access  Private
+
+router.delete('/experience/:exp_id', auth, async (req, res) => {
+	try {
+		const profile = await Profile.findOne({ user: req.user.id });
+
+		// Get remove index
+		const removeIndex = profile.experience
+			.map(item => item.id)
+			.indexOf(req.params.exp_id);
+		//experience
+		profile.experience.splice(removeIndex, 1);
+
+		await profile.save();
+
+		res.json(profile);
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server Error');
+	}
+});
+
 module.exports = router;
