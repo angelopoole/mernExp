@@ -172,7 +172,7 @@ router.delete('/', auth, async (req, res) => {
 // @route   Put api/profile/experience
 // @desc    Add profile experience
 // @access  Private
-// @ToDo    create ability to update expereience
+
 router.put(
 	'/experience',
 	[
@@ -216,7 +216,6 @@ router.put(
 			// expArr = [newExp, ...expArr];
 			profile.experience = [newExp, ...profile.experience];
 			await profile.save();
-
 			res.json(profile);
 		} catch (err) {
 			console.error(err.message);
@@ -226,6 +225,64 @@ router.put(
 );
 
 // @route   Put api/profile/experience/:exp_id
+// @desc    update profile experience
+// @access  Private
+
+router.put(
+	'/experience/:exp_id',
+	[
+		auth,
+		[
+			check('title', 'Title is reqired').not().isEmpty(),
+			check('company', 'Company is reqired').not().isEmpty(),
+			check('from', 'From date is reqired').not().isEmpty(),
+		],
+	],
+	async (req, res) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+		//get the new form data in the request body
+		const {
+			title,
+			company,
+			location,
+			from,
+			to,
+			current,
+			description,
+		} = req.body;
+
+		const newExp = {
+			title,
+			company,
+			location,
+			from,
+			to,
+			current,
+			description,
+		};
+
+		try {
+			let profile = await Profile.findOne({ user: req.user.id });
+
+			let excludedExp = profile.experience.filter(exp => {
+				return exp.id !== req.params.exp_id;
+			});
+			profile.experience = excludedExp;
+
+			profile.experience = [newExp, ...profile.experience];
+			await profile.save();
+			res.json(profile);
+		} catch (err) {
+			console.error(err.message);
+			res.status(500).send('Server error');
+		}
+	}
+);
+//////////////////////////////////////////////////////////////////////////////////////////////
+// @route   delete api/profile/experience/:exp_id
 // @desc    Delete experience from profile
 // @access  Private
 
@@ -345,7 +402,6 @@ router.get('/github/:username', async (req, res) => {
 		};
 
 		const gitHubResponse = await axios.get(uri, { headers });
-		// console.log({ gitHubResponse });
 		return res.json(gitHubResponse.data);
 	} catch (err) {
 		console.error(err.message);
