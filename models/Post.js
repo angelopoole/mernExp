@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 
 const postSchema = new Schema({
 	user: {
@@ -52,4 +53,5 @@ const postSchema = new Schema({
 	],
 });
 
+// eslint-disable-next-line no-multi-assign, no-undef
 module.exports = Post = mongoose.model('post', postSchema);

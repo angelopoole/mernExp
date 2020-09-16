@@ -1,15 +1,15 @@
 const express = require('express');
 const axios = require('axios');
-const router = express.Router();
 const config = require('config');
-const auth = require('../../middleware/auth');
-const { check, validationResult } = require('express-validator');
-// bring in normalize to give us a proper url, regardless of what user entered, to be added to website social profile field @route    POST api/profile
-
 const normalize = require('normalize-url');
+const { check, validationResult } = require('express-validator');
+const auth = require('../../middleware/auth');
+const User = require('../../models/User');
 
 const Profile = require('../../models/Profile');
-const User = require('../../models/User');
+
+const router = express.Router();
+// bring in normalize to give us a proper url, regardless of what user entered, to be added to website social profile field @route    POST api/profile
 
 // @route   Get api/profile/me
 // @desc    Get current users profile
@@ -77,7 +77,7 @@ router.post(
 		if (status) profileFields.status = status;
 		if (githubusername) profileFields.githubusername = githubusername;
 		if (skills) {
-			profileFields.skills = skills.split(',').map(skill => skill.trim());
+			profileFields.skills = skills.split(',').map((skill) => skill.trim());
 		}
 
 		// Build social object
@@ -92,7 +92,7 @@ router.post(
 			let profile = await Profile.findOne({ user: req.user.id });
 
 			if (profile) {
-				//update
+				// update
 				profile = await Profile.findOneAndUpdate(
 					{ user: req.user.id },
 					{ $set: profileFields },
@@ -101,7 +101,7 @@ router.post(
 				return res.json(profile);
 			}
 
-			//create
+			// create
 			// profile = new Profile(profileFields);
 			// await profile.save();
 			// res.json(profile);
@@ -120,7 +120,7 @@ router.post(
 // @access  Public
 router.get('/', async (req, res) => {
 	try {
-		//populate will take in a model to populate from and the attributes of the model that you want to add to the resource that you're pulling from.
+		// populate will take in a model to populate from and the attributes of the model that you want to add to the resource that you're pulling from.
 		const profiles = await Profile.find().populate('user', ['name', 'avatar']);
 		res.send(profiles);
 	} catch (err) {
@@ -144,7 +144,7 @@ router.get('/user/:user_id', async (req, res) => {
 		res.send(profile);
 	} catch (err) {
 		console.error(err.message);
-		if (err.kind == 'ObjectId') {
+		if (err.kind === 'ObjectId') {
 			return res.status(400).json({ msg: 'There is no profile for this user' });
 		}
 		res.status(500).send('Server Error');
@@ -156,7 +156,7 @@ router.get('/user/:user_id', async (req, res) => {
 // @access  Private
 router.delete('/', auth, async (req, res) => {
 	try {
-		//@todo - remove users posts
+		// @todo - remove users posts
 		// remove profile
 		await Profile.findOneAndDelete({ user: req.user.id });
 		// remove user
@@ -243,7 +243,7 @@ router.put(
 		if (!errors.isEmpty()) {
 			return res.status(400).json({ errors: errors.array() });
 		}
-		//get the new form data in the request body
+		// get the new form data in the request body
 		const {
 			title,
 			company,
@@ -265,9 +265,9 @@ router.put(
 		};
 
 		try {
-			let profile = await Profile.findOne({ user: req.user.id });
+			const profile = await Profile.findOne({ user: req.user.id });
 
-			let excludedExp = profile.experience.filter(exp => {
+			const excludedExp = profile.experience.filter((exp) => {
 				return exp.id !== req.params.exp_id;
 			});
 			profile.experience = excludedExp;
@@ -281,7 +281,8 @@ router.put(
 		}
 	}
 );
-//////////////////////////////////////////////////////////////////////////////////////////////
+
+// #####################################################################
 // @route   delete api/profile/experience/:exp_id
 // @desc    Delete experience from profile
 // @access  Private
@@ -292,9 +293,9 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
 
 		// Get remove index
 		const removeIndex = profile.experience
-			.map(item => item.id)
+			.map((item) => item.id)
 			.indexOf(req.params.exp_id);
-		//experience
+		// experience
 		profile.experience.splice(removeIndex, 1);
 
 		await profile.save();
@@ -306,7 +307,7 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
 	}
 });
 
-////////////////////////////////////////////////////
+// ########################################################
 // @route   Put api/profile/education
 // @desc    Add profile education
 // @access  Private
@@ -373,9 +374,9 @@ router.delete('/education/:edu_id', auth, async (req, res) => {
 
 		// Get remove index
 		const removeIndex = profile.education
-			.map(item => item.id)
+			.map((item) => item.id)
 			.indexOf(req.params.edu_id);
-		//education
+		// education
 		profile.education.splice(removeIndex, 1);
 
 		await profile.save();
