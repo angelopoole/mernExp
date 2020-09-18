@@ -1,5 +1,6 @@
 const express = require('express');
 const { check, validationResult } = require('express-validator');
+
 const auth = require('../../middleware/auth');
 
 const Post = require('../../models/Post');
@@ -64,10 +65,15 @@ router.get('/', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
 	try {
 		const post = await Post.findById(req.params.id);
-
+		if (!post) {
+			return res.status(400).json({ msg: 'Post not found' });
+		}
 		res.send(post);
 	} catch (err) {
 		console.error(err.message);
+		if (err.kind === 'ObjectId') {
+			return res.status(404).json({ msg: 'Post not found' });
+		}
 		res.status(500).send('Server Error');
 	}
 });
@@ -78,9 +84,64 @@ router.get('/:id', auth, async (req, res) => {
 
 router.delete('/:id', auth, async (req, res) => {
 	try {
-		await Post.findOneAndDelete({ _id: req.params.id });
+		const post = await Post.findById(req.params.id);
+		if (!post) {
+			return res.status(400).json({ msg: 'Post not found' });
+		}
 
-		res.send('post deleted');
+		// Check user
+		if (post.user.toString() !== req.user.id) {
+			return res.status(401).json({ msg: 'User not authorized' });
+		}
+		await Post.deleteOne(post);
+		res.json({ msg: 'Post removed' });
+	} catch (err) {
+		console.error(err.message);
+		if (err.kind === 'ObjectId') {
+			return res.status(404).json({ msg: 'Post not found' });
+		}
+		res.status(500).send('Server Error');
+	}
+});
+
+// @route    Put api/posts/:id
+// @desc     update post by id
+// @access   Private
+
+router.put('/:id', auth, async (req, res) => {
+	try {
+		const post = await Post.findById(req.params.id);
+		const user = await User.findById(req.user.id);
+
+		const alreadyLiked = post.likes.some((users) => users.id === user.id);
+		console.log(alreadyLiked);
+		if (alreadyLiked) {
+			post.likes = post.likes.filter((users) => {
+				return users.id !== user.id;
+			});
+			await post.save();
+
+			return res.send(post);
+		}
+		post.likes = [user, ...post.likes];
+
+		await post.save();
+		res.send(post);
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server Error');
+	}
+});
+
+// @route    get api/posts/:id/likes
+// @desc     Get the number of likes a post has
+// @access   Private
+
+router.get('/:id/likes', auth, async (req, res) => {
+	try {
+		const post = await Post.findById(req.params.id);
+		const likes = post.likes.length;
+		res.json({ likes: likes });
 	} catch (err) {
 		console.error(err.message);
 		res.status(500).send('Server Error');
