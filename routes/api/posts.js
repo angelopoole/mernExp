@@ -125,7 +125,6 @@ router.put('/:id', auth, async (req, res) => {
 				return like.user.toString() !== user.id.toString();
 			});
 			await post.save();
-			console.log('here ');
 			return res.send(post.likes);
 		}
 		post.likes.unshift({ user: req.user.id });
