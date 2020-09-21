@@ -113,20 +113,24 @@ router.put('/:id', auth, async (req, res) => {
 		const post = await Post.findById(req.params.id);
 		const user = await User.findById(req.user.id);
 
-		const alreadyLiked = post.likes.some((users) => users.id === user.id);
-		console.log(alreadyLiked);
+		// console.log(post);
+
+		// find if alreadyLiked
+		const alreadyLiked = post.likes.some(
+			(like) => like.user.toString() === user.id.toString()
+		);
+
 		if (alreadyLiked) {
-			post.likes = post.likes.filter((users) => {
-				return users.id !== user.id;
+			post.likes = post.likes.filter((like) => {
+				return like.user.toString() !== user.id.toString();
 			});
 			await post.save();
-
-			return res.send(post);
+			console.log('here ');
+			return res.send(post.likes);
 		}
-		post.likes = [user, ...post.likes];
-
+		post.likes.unshift({ user: req.user.id });
 		await post.save();
-		res.send(post);
+		res.send(post.likes);
 	} catch (err) {
 		console.error(err.message);
 		res.status(500).send('Server Error');
