@@ -113,16 +113,15 @@ router.put('/:id', auth, async (req, res) => {
 		const post = await Post.findById(req.params.id);
 		const user = await User.findById(req.user.id);
 
-		// console.log(post);
-
 		// find if alreadyLiked
 		const alreadyLiked = post.likes.some(
-			(like) => like.user.toString() === user.id.toString()
+			(like) => like.user.toString() === user.id
 		);
 
 		if (alreadyLiked) {
+			// Each "Like.user" is an object that we have to call toString on in order to compare to user.id
 			post.likes = post.likes.filter((like) => {
-				return like.user.toString() !== user.id.toString();
+				return like.user.toString() !== user.id;
 			});
 			await post.save();
 			return res.send(post.likes);
