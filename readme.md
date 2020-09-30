@@ -14,3 +14,5 @@ This is a beginer application using the mern stack in order to better understand
 8. Gravatar
 9. axios
 10. normalize-url
+
+React is done using primarily hooks
