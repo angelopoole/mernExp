@@ -16,3 +16,4 @@ This is a beginer application using the mern stack in order to better understand
 10. normalize-url
 
 React is done using primarily hooks
+please await my next project that i will be working on thats centered around e-commerce
