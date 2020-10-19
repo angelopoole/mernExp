@@ -15,3 +15,7 @@ This is a beginer application using the mern stack in order to better understand
 9. axios
 10. normalize-url
 11. uuid
+
+@ todo{
+Add docker?
+}
