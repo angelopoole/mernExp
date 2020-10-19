@@ -18,4 +18,5 @@ This is a beginer application using the mern stack in order to better understand
 
 @ todo{
 Add docker?
+mess around with firebase/trello/watson for chatbot/inapp chat
 }
